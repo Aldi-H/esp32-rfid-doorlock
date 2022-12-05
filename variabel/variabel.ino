@@ -13,6 +13,7 @@
 
 #define SS_PIN  5  // ESP32 pin GIOP5 
 #define RST_PIN 27 // ESP32 pin GIOP27 
+#define RELAY 26
 
 MFRC522 rfid(SS_PIN, RST_PIN);
 ThingerESP32 thing(USERNAME, DEVICE_ID, DEVICE_CREDENTIAL);
@@ -22,6 +23,10 @@ void setup() {
   Serial.begin(115200);
   SPI.begin(); // init SPI bus
   rfid.PCD_Init(); // init MFRC522
+  
+  //
+  pinMode(RELAY, OUTPUT);
+  digitalWrite(RELAY, HIGH);
 
   thing.add_wifi(SSID, SSID_PASSWORD);
 
@@ -48,6 +53,19 @@ void loop() {
       thing["rfid"] >> outputValue(rfidStr);
       Serial.println();
       // rfidStr = "";
+
+      //rfidStr.toUpperCase();
+
+      if (rfidStr.substring(1) == "207 25 179 190") {
+        Serial.println("Authorized access");
+        Serial.println();
+        delay(500);
+        digitalWrite(RELAY, LOW);
+        delay(2000);
+        digitalWrite(RELAY, HIGH);
+      } else   {
+        Serial.println(" Access denied");
+      }
 
       rfid.PICC_HaltA(); // halt PICC
       rfid.PCD_StopCrypto1(); // stop encryption on PCD
